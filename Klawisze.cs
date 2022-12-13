@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
+using System.Media;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Xml;
 using System.Windows.Forms;
@@ -11,38 +12,40 @@ namespace Klawisze
     {
         
         
-        public static int W = 1028;
+        public static int W = 1026;
         public static int H = 768;
         public static int padding = 100;
-        private int tryb = 1;
+        private int mode = 1;
         private bool gameover = false;
         private bool start = true;
-        public bool blad = false;
+        public bool fail = false;
 
-        private static int iloscklawiszy = 10;
-        public static int szybkoscanimacji = 5;
+        private static int keyamount = 10;
+        public static int keyscale = 4;
+        public static int animspeed = 5;
 
-        public static Image klawiszimg = Image.FromFile("../../../zasoby/klawisz2.png");
+        private static SoundPlayer click = new SoundPlayer("../../../zasoby/klik.wav");
+        public static Image keyimg = Image.FromFile("../../../zasoby/klawisz.png");
         public static Image backgroundimg = Image.FromFile("../../../zasoby/tlo.png");
         public static Font font = new Font("Stretch Pro V2", 20);
         
         private menu menu;
-        private klawisz[] game;
+        private keys[] key;
         public Klawisze()
         {
             InitializeComponent();
             this.BackgroundImage = backgroundimg;
 
             menu = new menu(this);
-            game = new klawisz[iloscklawiszy];
+            key = new keys[keyamount];
             
-            for (int i = 0; i< iloscklawiszy; i++)
+            for (int i = 0; i< keyamount; i++)
             {
-                game[i] = new klawisz(this, 0);
+                key[i] = new keys(this, 0);
             }
-            for (int i = 0; i < iloscklawiszy; i++)
+            for (int i = 0; i < keyamount; i++)
             {
-                resetklawisza(i);
+                keyrst(i);
             }
 
             Application.Idle += gameloop;
@@ -57,15 +60,15 @@ namespace Klawisze
                 {                    
                     menu.update();
 
-                    if (tryb == 1) {
+                    if (mode == 1) {
                         
                         // anim handler
-                        for (int i = 0; i < iloscklawiszy; i++)
+                        for (int i = 0; i < keyamount; i++)
                         {
-                            if (game[i].animate && !game[i].blad)
-                                game[i].animacjaklawisza();
-                            else if (game[i].animate && game[i].blad)
-                                game[i].animacjabledu();
+                            if (key[i].animate && !key[i].fail)
+                                key[i].animacjaklawisza();
+                            else if (key[i].animate && key[i].fail)
+                                key[i].animacjabledu();
                         }
 
 
@@ -77,72 +80,73 @@ namespace Klawisze
 
         }
 
-        private void resetklawisza(int i)
+        private void keyrst(int i)
         {
-            int licznik = iloscklawiszy - 1;
-            int rst = licznik;
-            game[i].znak.Text = init.rndchar();
-            while (licznik != -1)
+            int cnt = keyamount - 1;
+            int rst = cnt;
+            key[i].keychar.Text = init.rndchar();
+            while (cnt != -1)
             {
-                if (licznik != i)
+                if (cnt != i)
                 {
-                    if (game[i].znak.Text == game[licznik].znak.Text)
+                    if (key[i].keychar.Text == key[cnt].keychar.Text)
                     {
-                        game[i].znak.Text = init.rndchar();
-                        licznik = iloscklawiszy - 1;
+                        key[i].keychar.Text = init.rndchar();
+                        cnt = rst;
                     }
                     else
                     {
-                        licznik--;
+                        cnt--;
                     }
                 }
-                else licznik--;
+                else cnt--;
             }
 
 
-            game[i].nowyklawisz(game);
-            licznik = rst;
-            while (licznik != -1)
+            key[i].newkey(key);
+            cnt = rst;
+            while (cnt != -1)
             {
-                    if (licznik != i)
+                    if (cnt != i)
                     {
-                        if (game[i].klawiszbox.Bounds.IntersectsWith(game[licznik].klawiszbox.Bounds))
+                        if (key[i].keybox.Bounds.IntersectsWith(key[cnt].keybox.Bounds))
                         {
-                            game[i].nowyklawisz(game);
-                            licznik = iloscklawiszy - 1;
+                            key[i].newkey(key);
+                            cnt = rst;
                         }
                         else
                         {
-                            licznik--;
+                            cnt--;
                         }
                     }
-                    else licznik--;
+                    else cnt--;
             }
 
-            game[i].animate = true;
+            key[i].animate = true;
 
         }
 
         private void Klawisze_KeyPress(object sender, KeyPressEventArgs e)
         {
             int licznik = 0;
-            for (int i = 0; i < iloscklawiszy; i++)
+            for (int i = 0; i < keyamount; i++)
             {
-                if (e.KeyChar.ToString().ToLower() == game[i].znak.Text || e.KeyChar.ToString().ToUpper() == game[i].znak.Text)
+                if (e.KeyChar.ToString().ToLower() == key[i].keychar.Text || e.KeyChar.ToString().ToUpper() == key[i].keychar.Text)
                 {
-                    menu.wcisniecia++;
+                    click.Play();
+                    menu.clicks++;
                     licznik++;
-                    resetklawisza(i);
+                    keyrst(i);
                 }
 
             }
             
             if (licznik == 0)
             {
-                for (int i = 0; i < iloscklawiszy; i++)
+                for (int i = 0; i < keyamount; i++)
                 {
-                    game[i].animate = true;
-                    game[i].blad = true;
+                    key[i].animate = true;
+                    key[i].fail = true;
                 }
             }
             

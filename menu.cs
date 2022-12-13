@@ -13,12 +13,13 @@ namespace Klawisze
     {
 
         public init init;
-        public int wcisniecia;
-        private static Image menuimg = Image.FromFile("../../../zasoby/tlomenu.png");
-        public PictureBox tlomenu;
-        private Label czas, knm, napis;
-        private Klawisze form;
         Stopwatch s;
+
+        public int clicks;
+        private static Image menuimg = Image.FromFile("../../../zasoby/tlomenu.png");
+        public PictureBox menubackground;
+        private Label time, knm, points;
+        private Klawisze form;
         static public int H = menuimg.Height;
         public menu(Klawisze form)
         {
@@ -28,37 +29,35 @@ namespace Klawisze
             s.Start();
             TimeSpan ts = s.Elapsed;
             string et = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            czas = new Label();
-            czas.Text = et;
-            czas.Location = new Point(20, 700);
+            time = new Label();
+            time.Text = et;
+            time.Location = new Point(20, 680);
             
             knm = new Label();
             knm.Text = "xd";
-            knm.Location = new Point(20, 650);
+            knm.Location = new Point(20, time.Location.Y - time.Font.Height * 4);
 
+            points = new Label();
+            points.Text = "PUNKTY :: 4020";
+            points.Location = new Point(20, time.Location.Y - time.Font.Height * 2);
 
-            tlomenu = new PictureBox();
-            tlomenu.Size = new Size(Klawisze.W, menuimg.Height);
-            tlomenu.Location = new Point(0, Klawisze.H - menuimg.Height);
-            tlomenu.Image = menuimg;
+            menubackground = new PictureBox();
+            menubackground.Size = new Size(Klawisze.W, menuimg.Height);
+            menubackground.Location = new Point(0, Klawisze.H - menuimg.Height);
+            menubackground.Image = menuimg;
             form.Paint += new PaintEventHandler(paintmenu);
         }
         
         public void update()
         {
             TimeSpan ts = s.Elapsed;
-            string et = String.Format("CZAS: {1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            czas.Text = et;
+            string et = String.Format("CZAS :: {1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            time.Text = et;
 
-            if (wcisniecia == 0)
-            {
-                knm.Text = "KNM: 0";
-            }
-            else
-            {
-                string knms = String.Format("KNM: {0:00}", wcisniecia / ts.TotalMinutes);
-                knm.Text = knms;
-            }  
+
+            string knms = String.Format("KNM :: {0:00}", clicks / ts.TotalMinutes);
+            knm.Text = knms;
+ 
 
             form.Invalidate();
         }
@@ -68,27 +67,25 @@ namespace Klawisze
         {
             e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
 
-            //Rectangle gradient = new Rectangle(0, Klawisze.H - form.menuBox.Height, form.menuBox.Width, form.menuBox.Height);
-            e.Graphics.DrawImage(tlomenu.Image, tlomenu.Left, tlomenu.Top, tlomenu.Width, tlomenu.Height);
+            e.Graphics.DrawImage(menubackground.Image, menubackground.Left, menubackground.Top, menubackground.Width, menubackground.Height);
 
-            Rectangle gradient = new Rectangle(tlomenu.Left, tlomenu.Top, tlomenu.Width, tlomenu.Height);
-            LinearGradientBrush pedzel = new LinearGradientBrush(
+            Rectangle gradient = new Rectangle(menubackground.Left, menubackground.Top, menubackground.Width, menubackground.Height);
+            LinearGradientBrush brush = new LinearGradientBrush(
                 new Point(0, 0),
-                new Point(0, tlomenu.Top),
+                new Point(0, menubackground.Top),
                 Color.FromArgb(0, 255, 255, 255),
                 Color.FromArgb(255, 0, 255, 229)
             );
 
            e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-           e.Graphics.FillRectangle(pedzel, gradient);
+           e.Graphics.FillRectangle(brush, gradient);
 
-            SolidBrush pedzel2 = new SolidBrush(Color.Black);
-            if (czas.Visible == true)
+            SolidBrush brush2 = new SolidBrush(Color.Black);
+            if (time.Visible == true)
             {
-                e.Graphics.DrawString(czas.Text, Klawisze.font, pedzel2, czas.Location);
-                e.Graphics.DrawString(knm.Text, Klawisze.font, pedzel2, knm.Location);
-
-
+                e.Graphics.DrawString(time.Text, Klawisze.font, brush2, time.Location);
+                e.Graphics.DrawString(knm.Text, Klawisze.font, brush2, knm.Location);
+                e.Graphics.DrawString(points.Text, Klawisze.font, brush2, points.Location);
             }
 
         }
