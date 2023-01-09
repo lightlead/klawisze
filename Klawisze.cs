@@ -20,22 +20,19 @@ namespace Klawisze
         private bool start = true;
         public bool fail = false;
 
+        // Maksymalnie 30 poniewa¿ wiêcej siê nie zmieœci na ekranie
         private static int keyamount = 10;
         public static int keyscale = 4;
         public static int animspeed = 5;
 
         private static SoundPlayer click = new SoundPlayer("../../../zasoby/klik.wav");
         public static Image keyimg = Image.FromFile("../../../zasoby/klawisz.png");
-        public static Image backgroundimg = Image.FromFile("../../../zasoby/tlo.png");
-        public static Font font = new Font("Stretch Pro V2", 20);
         
         private menu menu;
         private keys[] key;
         public Klawisze()
         {
             InitializeComponent();
-            this.BackgroundImage = backgroundimg;
-
             menu = new menu(this);
             key = new keys[keyamount];
             
@@ -45,7 +42,7 @@ namespace Klawisze
             }
             for (int i = 0; i < keyamount; i++)
             {
-                keyrst(i);
+                key[i].keyrst(key, i);
             }
 
             Application.Idle += gameloop;
@@ -56,22 +53,15 @@ namespace Klawisze
         {
             while (IsApplicationIdle())
             {
+                Invalidate();
                 if (!gameover && start)
-                {                    
-                    menu.update();
+                {                   
+                    // AKTUALIZUJE CZAS, KNM, 
+                    menu.statupdate();
 
                     if (mode == 1) {
-                        
-                        // anim handler
-                        for (int i = 0; i < keyamount; i++)
-                        {
-                            if (key[i].animate && !key[i].fail)
-                                key[i].animacjaklawisza();
-                            else if (key[i].animate && key[i].fail)
-                                key[i].animacjabledu();
-                        }
-
-
+                        animknm();
+                        menu.colorbg("darken");
                     }
 
                 }
@@ -80,50 +70,15 @@ namespace Klawisze
 
         }
 
-        private void keyrst(int i)
+        private void animknm()
         {
-            int cnt = keyamount - 1;
-            int rst = cnt;
-            key[i].keychar.Text = init.rndchar();
-            while (cnt != -1)
+            for (int i = 0; i < keyamount; i++)
             {
-                if (cnt != i)
-                {
-                    if (key[i].keychar.Text == key[cnt].keychar.Text)
-                    {
-                        key[i].keychar.Text = init.rndchar();
-                        cnt = rst;
-                    }
-                    else
-                    {
-                        cnt--;
-                    }
-                }
-                else cnt--;
+                if (key[i].animate && !key[i].fail)
+                    key[i].akeyspawn();
+                else if (key[i].animate && key[i].fail)
+                    key[i].aerror();
             }
-
-
-            key[i].newkey(key);
-            cnt = rst;
-            while (cnt != -1)
-            {
-                    if (cnt != i)
-                    {
-                        if (key[i].keybox.Bounds.IntersectsWith(key[cnt].keybox.Bounds))
-                        {
-                            key[i].newkey(key);
-                            cnt = rst;
-                        }
-                        else
-                        {
-                            cnt--;
-                        }
-                    }
-                    else cnt--;
-            }
-
-            key[i].animate = true;
-
         }
 
         private void Klawisze_KeyPress(object sender, KeyPressEventArgs e)
@@ -136,7 +91,7 @@ namespace Klawisze
                     click.Play();
                     menu.clicks++;
                     licznik++;
-                    keyrst(i);
+                    key[i].keyrst(key, i);
                 }
 
             }

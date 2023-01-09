@@ -13,77 +13,122 @@ namespace Klawisze
     {
 
         private Klawisze main;
+        private static Font keyfont = new Font("Stretch Pro V2", 20);
 
         public PictureBox keybox;
         public Label keychar;
         public bool animate = false;
+        public bool render = true;
         private bool left = true;
         private bool cycle = false;
         public bool fail = false;
 
 
         private Point AnimPoint;
-        public Point keyboxlocation;
+        private int vertfall = 10;
+        private int horizmove = 5;
 
-        private int distance = 10;
         public keys(Klawisze form, int mode)
         {
             this.main = form;
             
             keybox = new PictureBox();
             keybox.Location = new Point(init.rndint(Klawisze.padding, Klawisze.W - Klawisze.padding), init.rndint(Klawisze.padding, Klawisze.H - Klawisze.padding - menu.H));
+            AnimPoint = keybox.Location;
             keybox.Image = Klawisze.keyimg;
             keybox.Size = new Size(keybox.Image.Width / Klawisze.keyscale, keybox.Image.Height / Klawisze.keyscale);
-
-            AnimPoint = keybox.Location;
             keychar = new Label();
             keychar.ForeColor = Color.White;
             keychar.Text = init.rndchar();
             keychar.Location = charxy();
 
-            form.Paint += new PaintEventHandler(paintklawisz);
-            if (mode == 0)
-            {
-                
-            }
-            
+            form.Paint += new PaintEventHandler(paintkey);
         }
         
-        private void paintklawisz(object sender, PaintEventArgs e)
+        private void paintkey(object sender, PaintEventArgs e)
         {
 
-            e.Graphics.DrawImage(keybox.Image, keybox.Left, keybox.Top, keybox.Width, keybox.Height);
-
-            using (SolidBrush brush = new SolidBrush(keychar.ForeColor))
+            if (render == true)
             {
-                e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                e.Graphics.DrawString(keychar.Text, Klawisze.font, brush, keychar.Location);
+                e.Graphics.DrawImage(keybox.Image, keybox.Left, keybox.Top, keybox.Width, keybox.Height);
+
+                using (SolidBrush brush = new SolidBrush(keychar.ForeColor))
+                {
+                    e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+                    e.Graphics.DrawString(keychar.Text, keyfont, brush, keychar.Location);
+                }
             }
             
         }
         
-        public void newkey(keys[] Game)
+        public void newkey()
         {
             keybox.Location = new Point(init.rndint(Klawisze.padding, Klawisze.W - Klawisze.padding), init.rndint(Klawisze.padding, Klawisze.H - Klawisze.padding - menu.H));
             AnimPoint = keybox.Location;
             keychar.Location = charxy();
         }
 
-        public void animacjaklawisza()
+        public void keyrst(keys[] key, int i)
+        {
+            // losuje znak dopóki nie znajdzie takiego co nie ma na ekranie
+            int cnt = key.Length - 1;
+            int rst = cnt;
+            keychar.Text = init.rndchar();
+            while (cnt != -1)
+            {
+                if (cnt != i)
+                {
+                    if (keychar.Text == key[cnt].keychar.Text)
+                    {
+                        keychar.Text = init.rndchar();
+                        cnt = rst;
+                    }
+                    else
+                    {
+                        cnt--;
+                    }
+                }
+                else cnt--;
+            }
+
+            //losuje pozycje
+            newkey();
+            cnt = rst;
+            while (cnt != -1)
+            {
+                if (cnt != i)
+                {
+                    if (key[i].keybox.Bounds.IntersectsWith(key[cnt].keybox.Bounds))
+                    {
+                        newkey();
+                        cnt = rst;
+                    }
+                    else
+                    {
+                        cnt--;
+                    }
+                }
+                else cnt--;
+            }
+
+
+            animate = true;
+            fail = false;
+        }
+
+        public void akeyspawn()
         {
             fail = false;
             keybox.Location = new Point(keybox.Location.X, keybox.Location.Y + Klawisze.animspeed);
             keychar.Location = charxy();
             
-            if (keybox.Location.Y >= AnimPoint.Y + distance)
+            if (keybox.Location.Y >= AnimPoint.Y + vertfall)
             {
                 animate = false;
             }
-
-            main.Invalidate();
         }
 
-        public void animacjabledu()
+        public void aerror()
         {
             if (left)
                 keybox.Location = new Point(keybox.Location.X - Klawisze.animspeed * 4, keybox.Location.Y);
@@ -93,18 +138,18 @@ namespace Klawisze
             keychar.Location = charxy();
             keychar.ForeColor = Color.FromArgb(255, 0, 255, 229);
 
-            if (keybox.Location.X < AnimPoint.X - distance && !cycle)
+            if (keybox.Location.X < AnimPoint.X - horizmove && !cycle)
             {
                 left = false;
             }
             
-            else if (keybox.Location.X > AnimPoint.X + distance*2 && !cycle)
+            else if (keybox.Location.X > AnimPoint.X + horizmove * 2 && !cycle)
             {
                 left = true;
                 cycle = true;
             }
             
-            else if (keybox.Location.X == AnimPoint.X && cycle)
+            else if (keybox.Location.X == AnimPoint.X && cycle || keybox.Location.X > AnimPoint.X + horizmove * 2 || keybox.Location.X < AnimPoint.X - horizmove)
             {
                 cycle = false;
                 left = true;
@@ -112,8 +157,6 @@ namespace Klawisze
                 fail = false;
                 keychar.ForeColor = Color.White;
             }
-
-            main.Invalidate();
         }
 
         private Point charxy()
