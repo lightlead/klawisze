@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace Klawisze
         {
             int losowa;
             Random rnd = new Random();
-            losowa = rnd.Next(33, 126); //ascii
+            //33, 126
+            losowa = rnd.Next(65, 90); //ascii
             char znak = Convert.ToChar(losowa);
             string znakstring = Convert.ToString(znak);
             znakstring = znakstring.ToUpper();

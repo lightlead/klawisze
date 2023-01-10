@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Klawisze
 {
@@ -14,8 +15,6 @@ namespace Klawisze
     {
         
         public init init;
-        Stopwatch s;
-
         private Font combotxtfont = new Font("Stretch Pro V2", 20);
         private Font combovalfont = new Font("Stretch Pro V2", 40);
         private Font bottomfont = new Font("Stretch Pro V2", 20);
@@ -26,27 +25,35 @@ namespace Klawisze
         private static int padding = 25;
         private static Image menuimg = Image.FromFile("../../../zasoby/tlomenu.png");
         public PictureBox menubackground;
-        private Label time, knm, points, combotxt, comboval;
+        public Label time, knm, points;
+        public Label combotxt, comboval;
+        public Label exit;
         private Klawisze form;
         static public int H = menuimg.Height;
-
+        public double knmVal;
+   
         private PictureBox bg;
         public static Image backgroundimg = Image.FromFile("../../../zasoby/tlo.png");
 
-        public SolidBrush bgbrush;
+        //anim
+
+        public SolidBrush bgbrush, combobrush;
         private Rectangle bgcolor;
-        private int bgcolorHZ = 4;
+        private int bgcolorHZ = 10;
         public menu(Klawisze form)
         {
             this.form = form;
 
             //gorna czesc
             combotxt = new Label();
+            combotxt.Visible = false;
             comboval = new Label();
             combotxt.Text = "COMBO";
             comboval.Text = "2X!";
-            comboval.Location = new Point(combotxt.Location.X + TextRenderer.MeasureText(e.Graphics, combotxt.Text, combotxtfont).Width, combotxt.Location.Y - 40);
-            combotxt.Location = new Point(padding, padding - combotxtfont.Height / 4);
+            combobrush = new SolidBrush(Color.FromArgb(255, 0, 0, 0));
+
+            exit = new Label();
+            exit.Text = "x";
 
             // bg
             bg = new PictureBox();
@@ -69,31 +76,28 @@ namespace Klawisze
             menubackground.Location = new Point(0, Klawisze.H - menuimg.Height);
             menubackground.Image = menuimg;
 
-            s = new Stopwatch();
-            s.Start();
-            TimeSpan ts = s.Elapsed;
-            string et = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            time = new Label();
-            time.Text = et;
+   
 
+            time = new Label();
             knm = new Label();
             knm.Text = "xd";
 
             // punkty
             points = new Label();
-            points.Text = "PUNKTY :: 4020";
+            points.Text = "PUNKTY :: 00";
             txtlocationupdate();
 
             form.Paint += new PaintEventHandler(paintmenu);
         }
         
-        public void statupdate()
+        public void statupdate(Stopwatch s)
         {
             TimeSpan ts = s.Elapsed;
             string et = String.Format("CZAS :: {1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
             time.Text = et;
 
-            string knms = String.Format("KNM :: {0:00}", clicks / ts.TotalMinutes);
+            knmVal = clicks / ts.TotalMinutes;
+            string knms = String.Format("KNM :: {0:00}", knmVal);
             knm.Text = knms;
         }
 
@@ -110,17 +114,25 @@ namespace Klawisze
             txtlocationupdate();
         }
 
-        public void colorbg(string func)
+        public void colorbg(string func, int i)
         {
             int alpha = bgbrush.Color.A;
             int red = bgbrush.Color.R;
             int green = bgbrush.Color.G;
             int blue = bgbrush.Color.B;
-
+            
             if (func == "darken")
             {
-                if (alpha < 150)
-                    alpha += bgcolorHZ;
+                red = 0;
+                green = 0;
+                blue = 0;
+
+                if (alpha < 100 && i == 1)
+                    alpha += bgcolorHZ/2;
+
+                if (alpha < 200 && i == 2)
+                    alpha += bgcolorHZ/2;
+
             }
 
             if (func == "lighten")
@@ -129,6 +141,25 @@ namespace Klawisze
                     alpha -= bgcolorHZ;
             }
 
+
+            //failsafe
+            if (red > 255)
+                red = 255;
+            if (green > 255)
+                green = 255;
+            if (blue > 255)
+                blue = 255;
+            if (alpha > 255)
+                alpha = 255;
+
+            if (red < 0)
+                red = 0;
+            if (green < 0)
+                green = 0;
+            if (blue < 0)
+                blue = 0;
+            if (alpha < 0)
+                alpha = 0;
 
             bgbrush = new SolidBrush(Color.FromArgb(alpha, red, green, blue));
         }
@@ -139,6 +170,9 @@ namespace Klawisze
             ////////// ustawienia renderu
             e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
             SolidBrush black = new SolidBrush(Color.Black);
+            SolidBrush white = new SolidBrush(Color.White);
+            SolidBrush red = new SolidBrush(Color.Red);
+            SolidBrush cyan = new SolidBrush(Color.FromArgb(255, 0, 255, 229));
             LinearGradientBrush bluegrad = new LinearGradientBrush(
                 new Point(0, 0),
                 new Point(0, menubackground.Top),
@@ -156,8 +190,19 @@ namespace Klawisze
             }
 
             //////////////// gorna czesc panelu
-            e.Graphics.DrawString(combotxt.Text, combotxtfont, black, combotxt.Location);
-            e.Graphics.DrawString(comboval.Text, combovalfont, black, comboval.Location);
+
+            int combotxtwidth = TextRenderer.MeasureText(combotxt.Text, combotxtfont).Width;
+            comboval.Location = new Point(combotxtwidth + padding, 0);
+            combotxt.Location = new Point(comboval.Location.X - combotxtwidth, comboval.Location.Y + 20);
+
+            if (combotxt.Visible)
+            {
+                e.Graphics.DrawString(combotxt.Text, combotxtfont, white, combotxt.Location);
+                e.Graphics.DrawString(comboval.Text, combovalfont, cyan, comboval.Location);
+            }
+
+            exit.Location = new Point(Klawisze.W - TextRenderer.MeasureText(exit.Text, combovalfont).Width, -10);
+            e.Graphics.DrawString(exit.Text, combovalfont, red, exit.Location);
 
 
             // ==================================================================================================== << DOLNY PANEL

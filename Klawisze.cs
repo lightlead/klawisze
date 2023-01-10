@@ -16,12 +16,19 @@ namespace Klawisze
         public static int H = 768;
         public static int padding = 100;
         private int mode = 1;
+        private Stopwatch s;
+        private TimeSpan ts;
+
+        private int streak = 0;
+        private int combo = 0;
+        private int points = 0;
         private bool gameover = false;
         private bool start = true;
         public bool fail = false;
 
         // Maksymalnie 30 poniewa¿ wiêcej siê nie zmieœci na ekranie
-        private static int keyamount = 10;
+        private static int maxkeyamount = 10;
+        private int keyamount;
         public static int keyscale = 4;
         public static int animspeed = 5;
 
@@ -30,38 +37,77 @@ namespace Klawisze
         
         private menu menu;
         private keys[] key;
+        private init init;
         public Klawisze()
         {
             InitializeComponent();
             menu = new menu(this);
-            key = new keys[keyamount];
+            key = new keys[maxkeyamount];
+            s = new Stopwatch();
+            s.Start();
             
-            for (int i = 0; i< keyamount; i++)
+            // tworzymy wszystkie klawisze
+            for (int i = 0; i < maxkeyamount; i++)
             {
-                key[i] = new keys(this, 0);
+                key[i] = new keys(this);
+
             }
-            for (int i = 0; i < keyamount; i++)
+
+            // resetujemy klawisze zeby sie nie powtarza³y znaki
+            for (int i = 0; i < maxkeyamount; i++)
             {
                 key[i].keyrst(key, i);
             }
 
-            Application.Idle += gameloop;
+            Application.Idle += animloop;
             
         }
 
-        private void gameloop(object sender, EventArgs e)
+        private void animloop(object sender, EventArgs e)
         {
             while (IsApplicationIdle())
             {
                 Invalidate();
                 if (!gameover && start)
-                {                   
+                {
                     // AKTUALIZUJE CZAS, KNM, 
-                    menu.statupdate();
+                    ts = s.Elapsed;
+                    menu.statupdate(s);
+                    if (ts.Seconds == 10)
+                    {
+                        //s.Stop();
+                    }
 
                     if (mode == 1) {
                         animknm();
-                        menu.colorbg("darken");
+                        if (streak > 30)
+                        {
+                            menu.comboval.Text = "8X!";
+                            for (int i = 0; i < maxkeyamount; i++)
+                            {
+                                key[i].rainbow();
+                            }
+                            combo = 8;
+                        }
+                        else if (streak > 20)
+                        {
+                            menu.comboval.Text = "4X!";
+                            menu.colorbg("darken", 2);
+                            combo = 4;
+                        }
+                        else if (streak > 10)
+                        {
+                            menu.comboval.Text = "2X!";
+                            menu.colorbg("darken", 1);
+                            combo = 2;
+                            menu.combotxt.Visible = true;
+                        }
+                        else if (streak == 0)
+                        {
+                            combo = 1;
+                            menu.combotxt.Visible = false;
+                            menu.colorbg("lighten", 0);
+                        }
                     }
 
                 }
@@ -72,7 +118,7 @@ namespace Klawisze
 
         private void animknm()
         {
-            for (int i = 0; i < keyamount; i++)
+            for (int i = 0; i < maxkeyamount; i++)
             {
                 if (key[i].animate && !key[i].fail)
                     key[i].akeyspawn();
@@ -81,30 +127,48 @@ namespace Klawisze
             }
         }
 
+        private void Klawisze_MouseClick(object sender, MouseEventArgs e)
+        {
+            //MessageBox.Show("");
+
+            if (e.X > menu.exit.Location.X && e.X < menu.exit.Location.X + menu.exit.Width && e.Y > menu.exit.Location.Y && e.Y < menu.exit.Location.Y + 75)
+            {
+                DialogResult oknowyjscia = MessageBox.Show("Czy na pewno chcesz wyjœc z gry?", "[K]lawisze", MessageBoxButtons.YesNo);
+                if (oknowyjscia == DialogResult.Yes)
+                {
+                    Application.Exit();
+                }
+            }
+        }
+
         private void Klawisze_KeyPress(object sender, KeyPressEventArgs e)
         {
             int licznik = 0;
-            for (int i = 0; i < keyamount; i++)
+            for (int i = 0; i < maxkeyamount; i++)
             {
                 if (e.KeyChar.ToString().ToLower() == key[i].keychar.Text || e.KeyChar.ToString().ToUpper() == key[i].keychar.Text)
                 {
                     click.Play();
                     menu.clicks++;
-                    licznik++;
                     key[i].keyrst(key, i);
+                    streak++;
+                    points += 100 + (int)menu.knmVal * combo;
+                    menu.points.Text = "PUNKTY :: " + points;
+                    licznik++;
                 }
 
             }
             
             if (licznik == 0)
             {
-                for (int i = 0; i < keyamount; i++)
+                for (int i = 0; i < maxkeyamount; i++)
                 {
                     key[i].animate = true;
                     key[i].fail = true;
+                    streak = 0;
                 }
             }
-            
+
         }
 
         
@@ -132,5 +196,6 @@ namespace Klawisze
         {
 
         }
+
     }
 }

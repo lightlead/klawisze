@@ -43,6 +43,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Klawisze_KeyPress);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Klawisze_MouseClick);
             this.ResumeLayout(false);
 
         }
