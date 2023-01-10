@@ -19,19 +19,18 @@ namespace Klawisze
         private Font combovalfont = new Font("Stretch Pro V2", 40);
         private Font bottomfont = new Font("Stretch Pro V2", 20);
 
-        public int clicks;
-        public bool game = true;
+        public bool game = false;
         private static int statoffset = 110;
         private static int padding = 25;
         private static Image menuimg = Image.FromFile("../../../zasoby/tlomenu.png");
         public PictureBox menubackground;
-        public Label time, knm, points;
-        public Label combotxt, comboval;
+        public Label menubtn, time, knm, points, combotxt, comboval;
         public Label exit;
         private Klawisze form;
         static public int H = menuimg.Height;
         public double knmVal;
-   
+
+        private LinearGradientBrush menugrad;
         private PictureBox bg;
         public static Image backgroundimg = Image.FromFile("../../../zasoby/tlo.png");
 
@@ -69,6 +68,9 @@ namespace Klawisze
             bgcolor.Location = new Point(0, 0);
             bgbrush = new SolidBrush(Color.FromArgb(0, 0, 0, 0));
 
+            /////////////////////////
+            ///
+
             // ==================================================================================================== << DOLNY PANEL
             // tło dolnego panelu
             menubackground = new PictureBox();
@@ -76,7 +78,9 @@ namespace Klawisze
             menubackground.Location = new Point(0, Klawisze.H - menuimg.Height);
             menubackground.Image = menuimg;
 
-   
+            menubtn = new Label();
+            menubtn.Text = "MENU";
+            menubtn.Location = new Point(Klawisze.W - 300, Klawisze.H - 120);
 
             time = new Label();
             knm = new Label();
@@ -87,10 +91,17 @@ namespace Klawisze
             points.Text = "PUNKTY :: 00";
             txtlocationupdate();
 
+            menugrad = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(0, menubackground.Top),
+                Color.FromArgb(0, 255, 255, 255),
+                Color.FromArgb(255, 0, 255, 229)
+            );
+
             form.Paint += new PaintEventHandler(paintmenu);
         }
         
-        public void statupdate(Stopwatch s)
+        public void statupdate(Stopwatch s, int pointsValue, int clicks)
         {
             TimeSpan ts = s.Elapsed;
             string et = String.Format("CZAS :: {1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
@@ -99,6 +110,8 @@ namespace Klawisze
             knmVal = clicks / ts.TotalMinutes;
             string knms = String.Format("KNM :: {0:00}", knmVal);
             knm.Text = knms;
+
+            points.Text = "PUNKTY :: " + pointsValue.ToString();
         }
 
         private void txtlocationupdate()
@@ -164,6 +177,16 @@ namespace Klawisze
             bgbrush = new SolidBrush(Color.FromArgb(alpha, red, green, blue));
         }
 
+       public void setgradient(Color color)
+        {
+            menugrad = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(0, menubackground.Top),
+                Color.FromArgb(0, 255, 255, 255),
+                color
+            );
+        }
+
         private void paintmenu(object sender, PaintEventArgs e)
         {
             
@@ -173,12 +196,6 @@ namespace Klawisze
             SolidBrush white = new SolidBrush(Color.White);
             SolidBrush red = new SolidBrush(Color.Red);
             SolidBrush cyan = new SolidBrush(Color.FromArgb(255, 0, 255, 229));
-            LinearGradientBrush bluegrad = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(0, menubackground.Top),
-                Color.FromArgb(0, 255, 255, 255),
-                Color.FromArgb(255, 0, 255, 229)
-            );
 
             ////////////// tlo
             e.Graphics.DrawImage(bg.Image, bg.Left, bg.Top, bg.Width, bg.Height);
@@ -195,7 +212,7 @@ namespace Klawisze
             comboval.Location = new Point(combotxtwidth + padding, 0);
             combotxt.Location = new Point(comboval.Location.X - combotxtwidth, comboval.Location.Y + 20);
 
-            if (combotxt.Visible)
+            if (combotxt.Visible && game == true)
             {
                 e.Graphics.DrawString(combotxt.Text, combotxtfont, white, combotxt.Location);
                 e.Graphics.DrawString(comboval.Text, combovalfont, cyan, comboval.Location);
@@ -206,12 +223,13 @@ namespace Klawisze
 
 
             // ==================================================================================================== << DOLNY PANEL
-            e.Graphics.DrawImage(menubackground.Image, menubackground.Left, menubackground.Top, menubackground.Width, menubackground.Height);
-            Rectangle gradient = new Rectangle(menubackground.Left, menubackground.Top, menubackground.Width, menubackground.Height);
-            e.Graphics.FillRectangle(bluegrad, gradient);
-
-            if (time.Visible == true)
+            if (game == true)
             {
+                e.Graphics.DrawImage(menubackground.Image, menubackground.Left, menubackground.Top, menubackground.Width, menubackground.Height);
+                Rectangle gradient = new Rectangle(menubackground.Left, menubackground.Top, menubackground.Width, menubackground.Height);
+                e.Graphics.FillRectangle(menugrad, gradient);
+
+                e.Graphics.DrawString(menubtn.Text, bottomfont, black, menubtn.Location);
                 e.Graphics.DrawString(time.Text, bottomfont, black, time.Location);
                 e.Graphics.DrawString(knm.Text, bottomfont, black, knm.Location);
                 e.Graphics.DrawString(points.Text, bottomfont, black, points.Location);

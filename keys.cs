@@ -20,7 +20,7 @@ namespace Klawisze
         public PictureBox keybox;
         public Label keychar;
         public bool animate = false;
-        public bool render = true;
+        public bool render = false;
         private bool left = true;
         private bool cycle = false;
         public bool fail = false;
@@ -167,7 +167,7 @@ namespace Klawisze
                 else cnt--;
             }
 
-
+            keybrush = new SolidBrush(Color.White);
             animate = true;
             fail = false;
         }
@@ -184,7 +184,7 @@ namespace Klawisze
             }
         }
 
-        public void aerror()
+        public void aerror(Color themecolor)
         {
             if (left)
                 keybox.Location = new Point(keybox.Location.X - Klawisze.animspeed * 4, keybox.Location.Y);
@@ -192,7 +192,7 @@ namespace Klawisze
                 keybox.Location = new Point(keybox.Location.X + Klawisze.animspeed * 4, keybox.Location.Y);
             
             keychar.Location = charxy();
-            keybrush = new SolidBrush(Color.FromArgb(255, 0, 255, 229));
+            keybrush = new SolidBrush(themecolor);
 
             if (keybox.Location.X < AnimPoint.X - horizmove && !cycle)
             {
