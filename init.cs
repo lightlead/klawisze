@@ -21,12 +21,18 @@ namespace Klawisze
             losowa = rnd.Next(min, max);
             return losowa;
         }
-        public static string rndchar()
+        public static string rndchar(int mode)
         {
-            int losowa;
+            int losowa = 0;
             Random rnd = new Random();
-            //33, 126
-            losowa = rnd.Next(65, 90); //ascii
+            if (mode == 1)
+            {
+                losowa = rnd.Next(33, 126); //ascii
+            }
+            else if (mode == 3)
+            {
+                losowa = rnd.Next(65, 90);
+            }
             char znak = Convert.ToChar(losowa);
             string znakstring = Convert.ToString(znak);
             znakstring = znakstring.ToUpper();

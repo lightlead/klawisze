@@ -50,6 +50,10 @@
             this.mode4btn = new System.Windows.Forms.Label();
             this.mode3btn = new System.Windows.Forms.Label();
             this.mode2btn = new System.Windows.Forms.Label();
+            this.wordbox = new System.Windows.Forms.TextBox();
+            this.scoreboardmode = new System.Windows.Forms.Label();
+            this.scoreboardright = new System.Windows.Forms.Label();
+            this.scoreboardleft = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // title
@@ -86,7 +90,7 @@
             this.backtogame.Name = "backtogame";
             this.backtogame.Size = new System.Drawing.Size(948, 150);
             this.backtogame.TabIndex = 2;
-            this.backtogame.Text = "WRÓC DO ROZGRYWKI  😎👍";
+            this.backtogame.Text = "WRÓĆ DO ROZGRYWKI  😎👍";
             this.backtogame.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.backtogame.Visible = false;
             this.backtogame.Click += new System.EventHandler(this.backtogame_Click);
@@ -346,14 +350,70 @@
             this.mode2btn.Visible = false;
             this.mode2btn.Click += new System.EventHandler(this.mode2btn_Click);
             // 
+            // wordbox
+            // 
+            this.wordbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.wordbox.Font = new System.Drawing.Font("Stretch Pro V2", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.wordbox.Location = new System.Drawing.Point(245, 550);
+            this.wordbox.MaxLength = 15;
+            this.wordbox.Name = "wordbox";
+            this.wordbox.Size = new System.Drawing.Size(537, 37);
+            this.wordbox.TabIndex = 22;
+            this.wordbox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.wordbox.Visible = false;
+            this.wordbox.TextChanged += new System.EventHandler(this.wordbox_TextChanged);
+            // 
+            // scoreboardmode
+            // 
+            this.scoreboardmode.BackColor = System.Drawing.Color.Black;
+            this.scoreboardmode.Font = new System.Drawing.Font("Stretch Pro V2", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.scoreboardmode.ForeColor = System.Drawing.Color.Cyan;
+            this.scoreboardmode.Location = new System.Drawing.Point(271, 26);
+            this.scoreboardmode.Name = "scoreboardmode";
+            this.scoreboardmode.Size = new System.Drawing.Size(473, 63);
+            this.scoreboardmode.TabIndex = 23;
+            this.scoreboardmode.Text = "SŁOWA + MYSZKA";
+            this.scoreboardmode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.scoreboardmode.Visible = false;
+            // 
+            // scoreboardright
+            // 
+            this.scoreboardright.BackColor = System.Drawing.Color.Black;
+            this.scoreboardright.Font = new System.Drawing.Font("Stretch Pro V2", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.scoreboardright.ForeColor = System.Drawing.Color.White;
+            this.scoreboardright.Location = new System.Drawing.Point(750, 26);
+            this.scoreboardright.Name = "scoreboardright";
+            this.scoreboardright.Size = new System.Drawing.Size(80, 63);
+            this.scoreboardright.TabIndex = 24;
+            this.scoreboardright.Text = "↪";
+            this.scoreboardright.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.scoreboardright.Visible = false;
+            this.scoreboardright.Click += new System.EventHandler(this.scoreboardright_Click);
+            // 
+            // scoreboardleft
+            // 
+            this.scoreboardleft.BackColor = System.Drawing.Color.Black;
+            this.scoreboardleft.Font = new System.Drawing.Font("Stretch Pro V2", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.scoreboardleft.ForeColor = System.Drawing.Color.White;
+            this.scoreboardleft.Location = new System.Drawing.Point(185, 26);
+            this.scoreboardleft.Name = "scoreboardleft";
+            this.scoreboardleft.Size = new System.Drawing.Size(80, 63);
+            this.scoreboardleft.TabIndex = 25;
+            this.scoreboardleft.Text = "↩";
+            this.scoreboardleft.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.scoreboardleft.Visible = false;
+            this.scoreboardleft.Click += new System.EventHandler(this.scoreboardleft_Click);
+            // 
             // Klawisze
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(1024, 768);
+            this.Controls.Add(this.scoreboardleft);
+            this.Controls.Add(this.scoreboardright);
+            this.Controls.Add(this.scoreboardmode);
             this.Controls.Add(this.mode2btn);
-            this.Controls.Add(this.mode3btn);
             this.Controls.Add(this.mode4btn);
             this.Controls.Add(this.mode1btn);
             this.Controls.Add(this.exitmode);
@@ -363,17 +423,19 @@
             this.Controls.Add(this.top1);
             this.Controls.Add(this.nickbox);
             this.Controls.Add(this.exitgame);
-            this.Controls.Add(this.backtogame);
             this.Controls.Add(this.title);
-            this.Controls.Add(this.top5);
             this.Controls.Add(this.top5score);
-            this.Controls.Add(this.scoreboardbtn);
             this.Controls.Add(this.top4);
             this.Controls.Add(this.top4score);
             this.Controls.Add(this.top3);
             this.Controls.Add(this.top3score);
             this.Controls.Add(this.startbtn);
+            this.Controls.Add(this.wordbox);
+            this.Controls.Add(this.backtogame);
+            this.Controls.Add(this.top5);
+            this.Controls.Add(this.scoreboardbtn);
             this.Controls.Add(this.countdown);
+            this.Controls.Add(this.mode3btn);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.KeyPreview = true;
@@ -411,5 +473,9 @@
         private Label mode4btn;
         private Label mode3btn;
         private Label mode2btn;
+        private TextBox wordbox;
+        private Label scoreboardmode;
+        private Label scoreboardright;
+        private Label scoreboardleft;
     }
 }

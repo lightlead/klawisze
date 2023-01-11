@@ -38,13 +38,13 @@ namespace Klawisze
             this.main = form;
             keybrush = new SolidBrush(Color.White);
             keybox = new PictureBox();
-            keybox.Location = new Point(init.rndint(Klawisze.padding, Klawisze.W - Klawisze.padding), init.rndint(Klawisze.padding, Klawisze.H - Klawisze.padding - menu.H));
+            keybox.Location = new Point(init.rndint(Klawisze.padding, Klawisze.W - Klawisze.padding), init.rndint(Klawisze.padding, Klawisze.H - Klawisze.padding - gameui.H));
             AnimPoint = keybox.Location;
             keybox.Image = Klawisze.keyimg;
             keybox.Size = new Size(keybox.Image.Width / Klawisze.keyscale, keybox.Image.Height / Klawisze.keyscale);
             keychar = new Label();
             keychar.ForeColor = Color.White;
-            keychar.Text = init.rndchar();
+            keychar.Text = init.rndchar(0);
             keychar.Location = charxy();
 
             form.Paint += new PaintEventHandler(paintkey);
@@ -119,24 +119,24 @@ namespace Klawisze
         
         public void newkey()
         {
-            keybox.Location = new Point(init.rndint(Klawisze.padding, Klawisze.W - Klawisze.padding), init.rndint(Klawisze.padding, Klawisze.H - Klawisze.padding - menu.H));
+            keybox.Location = new Point(init.rndint(Klawisze.padding, Klawisze.W - Klawisze.padding), init.rndint(Klawisze.padding, Klawisze.H - Klawisze.padding - gameui.H));
             AnimPoint = keybox.Location;
             keychar.Location = charxy();
         }
 
-        public void keyrst(keys[] key, int i)
+        public void keyrst(keys[] key, int i, int mode)
         {
             // losuje znak dopóki nie znajdzie takiego co nie ma na ekranie
             int cnt = key.Length - 1;
             int rst = cnt;
-            keychar.Text = init.rndchar();
+            keychar.Text = init.rndchar(mode);
             while (cnt != -1)
             {
                 if (cnt != i)
                 {
                     if (keychar.Text == key[cnt].keychar.Text)
                     {
-                        keychar.Text = init.rndchar();
+                        keychar.Text = init.rndchar(mode);
                         cnt = rst;
                     }
                     else

@@ -12,7 +12,10 @@ namespace Klawisze
         public class userdata
         {
             public string nick;
-            public int score;
+            public int score1;
+            public int score2;
+            public int score3;
+            public int score4;
         }
 
         public string nick;
@@ -21,7 +24,7 @@ namespace Klawisze
 
         private List<string> updatedscoreboard;
         private string[] importedscoreboard;
-        private string[] splitteddata = new string[2];
+        private string[] splitteddata = new string[5];
         private static string path = "../../../zasoby/scoreboard.txt";
 
         public scoreboard()
@@ -44,14 +47,19 @@ namespace Klawisze
                     for (int i = 0; i < importedscoreboard.Length; i++)
                     {
                         splitteddata = importedscoreboard[i].Split(";");
-                        loadedscoreboard.Add(new userdata { score = int.Parse(splitteddata[1]), nick = splitteddata[0] });
+                        loadedscoreboard.Add(new userdata { nick = splitteddata[0],
+                            score1 = int.Parse(splitteddata[1]),
+                            score2 = int.Parse(splitteddata[2]),
+                            score3 = int.Parse(splitteddata[3]),
+                            score4 = int.Parse(splitteddata[4])
+                        });
                     }
                 }
 
             }
             else
             {
-                File.Create("../../../zasoby/scoreboard.txt");
+                File.Create("../../../zasoby/scoreboard.txt").Close();
             }
         }
 
@@ -59,7 +67,12 @@ namespace Klawisze
         {
             for (int i = 0; i < loadedscoreboard.Count; i++)
             {
-                updatedscoreboard.Add(loadedscoreboard[i].nick + ";" + loadedscoreboard[i].score);
+                updatedscoreboard.Add(loadedscoreboard[i].nick + ";"
+                    + loadedscoreboard[i].score1 + ";"
+                    + loadedscoreboard[i].score2 + ";"
+                    + loadedscoreboard[i].score3 + ";"
+                    + loadedscoreboard[i].score4 + ";"
+                    );
             }
             File.WriteAllLines(path, updatedscoreboard);
 

@@ -49,14 +49,14 @@ namespace Klawisze
         private static SoundPlayer click = new SoundPlayer("../../../zasoby/klik.wav");
         public static Image keyimg = Image.FromFile("../../../zasoby/klawisz.png");
         
-        private menu menu;
+        private gameui gameui;
         private keys[] key;
         private words[] word;
         private scoreboard scoreboard;
         public Klawisze()
         {
             InitializeComponent();
-            menu = new menu(this);
+            gameui = new gameui(this);
             scoreboard = new scoreboard();
             word = new words[maxwordamount];
             key = new keys[maxkeyamount];
@@ -75,9 +75,9 @@ namespace Klawisze
                 key[i] = new keys(this);
             }
 
-            for (int i = 0; i < maxkeyamount; i++)
+            for (int i = 0; i < maxwordamount; i++)
             {
-                key[i] = new keys(this);
+                word[i] = new words(this);
             }
 
         }
@@ -109,11 +109,12 @@ namespace Klawisze
 
                     // AKTUALIZUJE CZAS, KNM, PUNKTY
                     ts = s.Elapsed;
-                    menu.statupdate(s, points, clicks);
+                    gameui.statupdate(s, points, clicks);
 
                     // KOÑCZY KA¯DY TRYB PO MINUCIE
                     if (ts.Minutes == 1)
                     {
+                        addtoscoreboard();
                         showscoreboard();
                         stopgame();
                     }
@@ -123,7 +124,7 @@ namespace Klawisze
                         animkeys();
                         if (streak > 30)
                         {
-                            menu.comboval.Text = "8X!";
+                            gameui.comboval.Text = "8X!";
                             for (int i = 0; i < keyamount; i++)
                             {
                                 key[i].rainbow();
@@ -132,22 +133,22 @@ namespace Klawisze
                         }
                         else if (streak > 20)
                         {
-                            menu.comboval.Text = "4X!";
-                            menu.colorbg("darken", 2);
+                            gameui.comboval.Text = "4X!";
+                            gameui.colorbg("darken", 2);
                             combo = 4;
                         }
                         else if (streak > 10)
                         {
-                            menu.comboval.Text = "2X!";
-                            menu.colorbg("darken", 1);
+                            gameui.comboval.Text = "2X!";
+                            gameui.colorbg("darken", 1);
                             combo = 2;
-                            menu.combotxt.Visible = true;
+                            gameui.combotxt.Visible = true;
                         }
                         else if (streak == 0)
                         {
                             combo = 1;
-                            menu.combotxt.Visible = false;
-                            menu.colorbg("lighten", 0);
+                            gameui.combotxt.Visible = false;
+                            gameui.colorbg("lighten", 0);
                         }
                     }
 
@@ -157,78 +158,6 @@ namespace Klawisze
 
         }
 
-        private void showscoreboard()
-        {
-            exitmode.Visible = true;
-            scoreboard.loadedscoreboard.Add(new scoreboard.userdata { score = points, nick = nick });
-            scoreboard.loadedscoreboard = scoreboard.loadedscoreboard.OrderByDescending(o => o.score).ToList();
-
-            title.Visible = true;
-            top1.Text = scoreboard.loadedscoreboard[0].nick;
-            top1score.Text = scoreboard.loadedscoreboard[0].score.ToString();
-            top1.Visible = true;
-            top1score.Visible = true;
-
-            if (scoreboard.loadedscoreboard.Count == 2 )
-            {
-                top2.Text = scoreboard.loadedscoreboard[1].nick;
-                top2score.Text = scoreboard.loadedscoreboard[1].score.ToString();
-                top2.Visible = true;
-                top2score.Visible = true;
-            }
-            else if (scoreboard.loadedscoreboard.Count == 3)
-            {
-                top2.Text = scoreboard.loadedscoreboard[1].nick;
-                top2score.Text = scoreboard.loadedscoreboard[1].score.ToString();
-                top2.Visible = true;
-                top2score.Visible = true;
-
-                top3.Text = scoreboard.loadedscoreboard[2].nick;
-                top3score.Text = scoreboard.loadedscoreboard[2].score.ToString();
-                top3.Visible = true;
-                top3score.Visible = true;
-            }
-            else if (scoreboard.loadedscoreboard.Count == 4)
-            {
-                top2.Text = scoreboard.loadedscoreboard[1].nick;
-                top2score.Text = scoreboard.loadedscoreboard[1].score.ToString();
-                top2.Visible = true;
-                top2score.Visible = true;
-
-                top3.Text = scoreboard.loadedscoreboard[2].nick;
-                top3score.Text = scoreboard.loadedscoreboard[2].score.ToString();
-                top3.Visible = true;
-                top3score.Visible = true;
-
-                top4.Text = scoreboard.loadedscoreboard[3].nick;
-                top4score.Text = scoreboard.loadedscoreboard[3].score.ToString();
-                top4.Visible = true;
-                top4score.Visible = true;
-            }
-            else if (scoreboard.loadedscoreboard.Count >= 5 )
-            {
-                top2.Text = scoreboard.loadedscoreboard[1].nick;
-                top2score.Text = scoreboard.loadedscoreboard[1].score.ToString();
-                top2.Visible = true;
-                top2score.Visible = true;
-
-                top3.Text = scoreboard.loadedscoreboard[2].nick;
-                top3score.Text = scoreboard.loadedscoreboard[2].score.ToString();
-                top3.Visible = true;
-                top3score.Visible = true;
-
-                top4.Text = scoreboard.loadedscoreboard[3].nick;
-                top4score.Text = scoreboard.loadedscoreboard[3].score.ToString();
-                top4.Visible = true;
-                top4score.Visible = true;
-
-                top5.Text = scoreboard.loadedscoreboard[4].nick;
-                top5score.Text = scoreboard.loadedscoreboard[4].score.ToString();
-                top5.Visible = true;
-                top5score.Visible = true;
-            }
-
-        }
 
         private void animkeys()
         {
@@ -244,7 +173,7 @@ namespace Klawisze
         private void Klawisze_MouseClick(object sender, MouseEventArgs e)
         {
             // wyjscie
-            if (e.X > menu.exit.Location.X && e.X < menu.exit.Location.X + menu.exit.Width && e.Y > menu.exit.Location.Y && e.Y < menu.exit.Location.Y + 75)
+            if (e.X > gameui.exit.Location.X && e.X < gameui.exit.Location.X + gameui.exit.Width && e.Y > gameui.exit.Location.Y && e.Y < gameui.exit.Location.Y + 75)
             {
                 freezegame();
                 DialogResult oknowyjscia = MessageBox.Show("Czy na pewno chcesz wyjœc z gry?", "[K]lawisze", MessageBoxButtons.YesNo);
@@ -258,7 +187,7 @@ namespace Klawisze
 
             // menu
 
-            if (e.X > menu.menubtn.Location.X && e.X < menu.menubtn.Location.X + menu.menubtn.Width + 40 && e.Y > menu.menubtn.Location.Y && e.Y < menu.menubtn.Location.Y + 40)
+            if (e.X > gameui.menubtn.Location.X && e.X < gameui.menubtn.Location.X + gameui.menubtn.Width + 40 && e.Y > gameui.menubtn.Location.Y && e.Y < gameui.menubtn.Location.Y + 40)
             {
                 stopgame();
                 showpausemenu();
@@ -268,6 +197,7 @@ namespace Klawisze
 
         private void backtomainmenu()
         {
+            click.Play();
             nickbox.Visible = true;
             startbtn.Visible = true;
             scoreboardbtn.Visible = true;
@@ -278,6 +208,7 @@ namespace Klawisze
 
         private void hidemainmenu()
         {
+            click.Play();
             nickbox.Visible = false;
             startbtn.Visible = false;
             scoreboardbtn.Visible = false;
@@ -287,6 +218,7 @@ namespace Klawisze
 
         private void showpausemenu()
         {
+            click.Play();
             title.Visible = true;
             exitmode.Visible = true;
             backtogame.Visible = true;
@@ -294,6 +226,7 @@ namespace Klawisze
 
         private void hidepausemenu()
         {
+            click.Play();
             title.Visible = false;
             exitmode.Visible = false;
             backtogame.Visible = false;
@@ -301,6 +234,11 @@ namespace Klawisze
 
         private void hidescoreboard()
         {
+            click.Play();
+            scoreboardleft.Visible = false;
+            scoreboardright.Visible = false;
+            scoreboardmode.Visible = false;
+
             top1.Visible = false;
             top1score.Visible = false;
 
@@ -342,11 +280,20 @@ namespace Klawisze
         private void stopgame()
         {
             s.Stop();
+            nickbox.ReadOnly = false;
             gamerunning = false;
-            menu.game = false;
-            for (int i = 0; i < maxkeyamount; i++)
+            gameui.game = false;
+            if (mode == 1 || mode == 3)
             {
-                key[i].render = false;
+                for (int i = 0; i < maxkeyamount; i++)
+                {
+                    key[i].render = false;
+                }
+            }
+            
+            if (mode == 2 || mode == 4)
+            {
+                wordbox.Visible = false;
             }
         }
 
@@ -378,8 +325,22 @@ namespace Klawisze
             startcountdown = true;
         }
 
+        private void wordbox_TextChanged(object sender, EventArgs e)
+        {
+            if (mode == 2 && gamerunning)
+            {
+
+            }
+            else if (mode == 4 && gamerunning)
+            {
+
+            }
+
+        }
+
         private void Klawisze_KeyPress(object sender, KeyPressEventArgs e)
         {
+
             if (mode == 1 && gamerunning)
             {
                 int cnt = 0;
@@ -387,11 +348,7 @@ namespace Klawisze
                 {
                     if (e.KeyChar.ToString().ToLower() == key[i].keychar.Text || e.KeyChar.ToString().ToUpper() == key[i].keychar.Text)
                     {
-                        click.Play();
-                        clicks++;
-                        key[i].keyrst(key, i);
-                        streak++;
-                        points += 100 + (int)menu.knmVal * combo;
+                        keyapproved(i);
                         cnt++;
                     }
 
@@ -410,17 +367,21 @@ namespace Klawisze
                         && cursor.Y > key[i].keybox.Location.Y && cursor.Y < key[i].keybox.Location.Y + key[i].keybox.Height
                         )
                     {
-                        click.Play();
-                        clicks++;
-                        key[i].keyrst(key, i);
-                        streak++;
-                        points += 100 + (int)menu.knmVal * combo;
+                        keyapproved(i);
                         cnt++;
                     }
                 }
                 keysfailanim(cnt);
             }
+        }
 
+        private void keyapproved(int i)
+        {
+            click.Play();
+            clicks++;
+            key[i].keyrst(key, i, mode);
+            streak++;
+            points += 100 + (int)gameui.knmVal * combo;
         }
 
         private void keysfailanim(int cnt)
@@ -451,14 +412,10 @@ namespace Klawisze
         private void startgame()
         {
             hidegamemodes();
-            for (int i = 0; i < maxkeyamount; i++)
-            {
-                key[i].keyrst(key, i);
-            }
-
             checkmode();
+            nickbox.ReadOnly = false;
             gamerunning = true;
-            menu.game = true;
+            gameui.game = true;
             s.Start();
         }
 
@@ -468,10 +425,10 @@ namespace Klawisze
             {
                 keyamount = 10;
                 thememodecolor = Color.Cyan;
-                menu.setgradient(thememodecolor);
+                gameui.setgradient(thememodecolor);
                 for (int i = 0; i < keyamount; i++)
                 {
-                    key[i].keyrst(key, i);
+                    key[i].keyrst(key, i, mode);
                     key[i].render = true;
                 }
             }
@@ -479,20 +436,24 @@ namespace Klawisze
             {
                 keyamount = 5;
                 thememodecolor = Color.Red;
-                menu.setgradient(thememodecolor);
+                gameui.setgradient(thememodecolor);
                 for (int i = 0; i < keyamount; i++)
                 {
-                    key[i].keyrst(key, i);
+                    key[i].keyrst(key, i, mode);
                     key[i].render = true;
                 }
             }
             else if (mode == 2)
             {
-                menu.setgradient(Color.Gold);
+                wordbox.BackColor = Color.Gold;
+                gameui.setgradient(Color.Gold);
+                wordbox.Visible = true;
             }
             else if (mode == 4)
             {
-                menu.setgradient(Color.Green);
+                wordbox.BackColor = Color.Chartreuse;
+                gameui.setgradient(Color.Chartreuse);
+                wordbox.Visible = true;
             }
         }
 
@@ -547,6 +508,406 @@ namespace Klawisze
             Application.Exit();
         }
 
+        private void addtoscoreboard()
+        {
+            if (mode == 1)
+            {
+                scoreboard.loadedscoreboard.Add(new scoreboard.userdata { score1 = points, nick = nick });
+            }
+            else if (mode == 3)
+            {
+                scoreboard.loadedscoreboard.Add(new scoreboard.userdata { score3 = points, nick = nick });
+            }
+            else if (mode == 2)
+            {
+                scoreboard.loadedscoreboard.Add(new scoreboard.userdata { score2 = points, nick = nick });
+            }
+            else if (mode == 4)
+            {
+                scoreboard.loadedscoreboard.Add(new scoreboard.userdata { score4 = points, nick = nick });
+            }
+        }
+
+        private void showscoreboard()
+        {
+            click.Play();
+            scoreboardleft.Visible = true;
+            scoreboardright.Visible = true;
+            scoreboardmode.Visible = true;
+            exitmode.Visible = true;
+            title.Visible = true;
+
+            if (mode == 1)
+            {
+                scoreboard.loadedscoreboard = scoreboard.loadedscoreboard.OrderByDescending(o => o.score1).ToList();
+                scoreboardmode.Text = "ZNAKI";
+                scoreboardmode.ForeColor = Color.Cyan;
+
+                if (scoreboard.loadedscoreboard.Count >= 5 && scoreboard.loadedscoreboard[4].score1 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score1.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score1.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score1.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[3].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[3].score1.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+
+                    top5.Text = scoreboard.loadedscoreboard[4].nick;
+                    top5score.Text = scoreboard.loadedscoreboard[4].score1.ToString();
+                    top5.Visible = true;
+                    top5score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 4 && scoreboard.loadedscoreboard[3].score1 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score1.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score1.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score1.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[3].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[3].score1.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 3 && scoreboard.loadedscoreboard[2].score1 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score1.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score1.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score1.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 2 && scoreboard.loadedscoreboard[1].score1 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score1.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score1.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 1 && scoreboard.loadedscoreboard[0].score1 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score1.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+                }
+            }
+            else if (mode == 3)
+            {
+                scoreboard.loadedscoreboard = scoreboard.loadedscoreboard.OrderByDescending(o => o.score3).ToList();
+                scoreboardmode.Text = "ZNAKI + MYSZKA";
+                scoreboardmode.ForeColor = Color.Red;
+
+                if (scoreboard.loadedscoreboard.Count >= 5 && scoreboard.loadedscoreboard[4].score3 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score3.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score3.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score3.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[3].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[3].score3.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+
+                    top5.Text = scoreboard.loadedscoreboard[4].nick;
+                    top5score.Text = scoreboard.loadedscoreboard[4].score3.ToString();
+                    top5.Visible = true;
+                    top5score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 4 && scoreboard.loadedscoreboard[3].score3 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score3.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score3.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score3.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[3].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[3].score3.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 3 && scoreboard.loadedscoreboard[2].score3 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score3.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score3.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score3.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 2 && scoreboard.loadedscoreboard[1].score3 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score3.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[1].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[1].score3.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 1 && scoreboard.loadedscoreboard[0].score3 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score3.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+                }
+            }
+            else if (mode == 2)
+            {
+                scoreboard.loadedscoreboard = scoreboard.loadedscoreboard.OrderByDescending(o => o.score2).ToList();
+                scoreboardmode.Text = "S£OWA";
+                scoreboardmode.ForeColor = Color.Gold;
+
+                if (scoreboard.loadedscoreboard.Count >= 5 && scoreboard.loadedscoreboard[4].score2 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score2.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[2].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[2].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+
+                    top5.Text = scoreboard.loadedscoreboard[2].nick;
+                    top5score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top5.Visible = true;
+                    top5score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 4 && scoreboard.loadedscoreboard[3].score2 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score2.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[2].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[2].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 3 && scoreboard.loadedscoreboard[2].score2 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score2.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[2].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[2].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 2 && scoreboard.loadedscoreboard[1].score2 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score2.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[2].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[2].score2.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 1 && scoreboard.loadedscoreboard[0].score2 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score2.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+                }
+            }
+            else if (mode == 4)
+            {
+                scoreboard.loadedscoreboard = scoreboard.loadedscoreboard.OrderByDescending(o => o.score4).ToList();
+                scoreboardmode.Text = "S£OWA + MYSZKA";
+                scoreboardmode.ForeColor = Color.Chartreuse;
+
+                if (scoreboard.loadedscoreboard.Count >= 2 && scoreboard.loadedscoreboard[1].score4 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score4.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[4].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 3 && scoreboard.loadedscoreboard[2].score4 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score4.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[4].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[4].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 4 && scoreboard.loadedscoreboard[3].score4 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score4.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[4].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[4].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[4].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 5 && scoreboard.loadedscoreboard[4].score4 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score4.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+
+                    top2.Text = scoreboard.loadedscoreboard[4].nick;
+                    top2score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top2.Visible = true;
+                    top2score.Visible = true;
+
+                    top3.Text = scoreboard.loadedscoreboard[4].nick;
+                    top3score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top3.Visible = true;
+                    top3score.Visible = true;
+
+                    top4.Text = scoreboard.loadedscoreboard[4].nick;
+                    top4score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top4.Visible = true;
+                    top4score.Visible = true;
+
+                    top5.Text = scoreboard.loadedscoreboard[4].nick;
+                    top5score.Text = scoreboard.loadedscoreboard[4].score4.ToString();
+                    top5.Visible = true;
+                    top5score.Visible = true;
+                }
+                else if (scoreboard.loadedscoreboard.Count >= 1 && scoreboard.loadedscoreboard[0].score4 != 0)
+                {
+                    top1.Text = scoreboard.loadedscoreboard[0].nick;
+                    top1score.Text = scoreboard.loadedscoreboard[0].score4.ToString();
+                    top1.Visible = true;
+                    top1score.Visible = true;
+                }
+            }
+
+        }
+
         #region struktura potrzebna do gameloopa
         [StructLayout(LayoutKind.Sequential)]
         public struct NativeMessage
@@ -560,6 +921,25 @@ namespace Klawisze
         }
         [DllImport("user32.dll")]
         public static extern int PeekMessage(out NativeMessage message, IntPtr window, uint filterMin, uint filterMax, uint remove);
+
+        private void scoreboardleft_Click(object sender, EventArgs e)
+        {
+            mode--;
+            if (mode == 0)
+                mode = 4;
+            hidescoreboard();
+            showscoreboard();
+        }
+
+        private void scoreboardright_Click(object sender, EventArgs e)
+        {
+            mode++;
+            if (mode == 5)
+                mode = 1;
+            hidescoreboard();
+            showscoreboard();
+        }
+
         bool IsApplicationIdle()
         {
             NativeMessage result;
